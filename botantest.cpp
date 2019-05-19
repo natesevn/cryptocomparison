@@ -161,7 +161,7 @@ int timeRSAOp(string plaintext) {
 	string priv = Botan::PKCS8::PEM_encode(key);
 
 	// Store public, private keys as memory data source
-    Botan::DataSource_Memory key_priv(priv);
+	Botan::DataSource_Memory key_priv(priv);
 
 	// Load public, private key
 	Botan::PKCS8_PrivateKey *priv_rsa = Botan::PKCS8::load_key(key_priv, rng);
