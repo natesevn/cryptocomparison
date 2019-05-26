@@ -18,8 +18,9 @@ using namespace seal;
 
 int main() {
 	clock_t start;
-	double duration;
+	double add_duration, e_duration, d_duration;
 
+	cout << "=========================================================================" << endl;
 	cout << "BFV using Microsoft SEAL." << endl;
 
 	/* 
@@ -52,8 +53,6 @@ int main() {
 	// Construct SEALContext object
 	auto context = SEALContext::Create(parms);
 
-	cout << "Parameters set." << endl;
-
 	/*
 	 * Plaintexts in BFV are polynomials with coefficients integers modulo plain_modulus
 	 * Need to encode data this way
@@ -74,54 +73,43 @@ int main() {
 	// Get an instance of decryptor to decrypt
 	Decryptor decryptor(context, secret_key);
 
-	// Encode two integers as plaintext polynomials
-	int value1 = 7;
-    Plaintext plain1 = encoder.encode(value1);
-    cout << "Encoded " << value1 << " as polynomial " << plain1.to_string() 
-        << " (plain1)" << endl;
+	for(int i=0; i<5; i++) {
 
-    int value2 = 8;
-    Plaintext plain2 = encoder.encode(value2);
-    cout << "Encoded " << value2 << " as polynomial " << plain2.to_string() 
-        << " (plain2)" << endl;
+		// Encode two integers as plaintext polynomials
+		int value1 = 7;
+		Plaintext plain1 = encoder.encode(value1);
+		int value2 = 8;
+		Plaintext plain2 = encoder.encode(value2);
 
-	// Encrypt
-	Ciphertext encrypted1, encrypted2;
-    cout << "Encrypting plain1: ";
-	start = clock();
-    encryptor.encrypt(plain1, encrypted1);
-	duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
-    cout << "Done (encrypted1) in " << duration << endl;
+		// Encrypt
+		Ciphertext encrypted1, encrypted2;
 
-    cout << "Encrypting plain2: ";
-    encryptor.encrypt(plain2, encrypted2);
-    cout << "Done (encrypted2)" << endl;
+		start = clock();
+		encryptor.encrypt(plain1, encrypted1);
+		e_duration = e_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
 
-	// Show noise budget
-	cout << "Noise budget in encrypted1: " 
-        << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
-    cout << "Noise budget in encrypted2: " 
-        << decryptor.invariant_noise_budget(encrypted2) << " bits" << endl;
+		start = clock();
+		encryptor.encrypt(plain2, encrypted2);
+		e_duration = e_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
 
-	// Perform addition on ciphertext
-	start = clock();
-	evaluator.add_inplace(encrypted1, encrypted2);
-	duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
-	cout << "Addition in " << duration << endl;
+		// Perform addition on ciphertext
+		start = clock();
+		evaluator.add_inplace(encrypted1, encrypted2);
+		add_duration = add_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
 
-	// Check noise budget after addition
-	cout << "Noise budget in encrypted1 + encrypted2: " 
-        << decryptor.invariant_noise_budget(encrypted1) << " bits" << endl;
+		// Decrypt and decode
+		Plaintext plain_result;
 
-	// Decrypt and decode
-	Plaintext plain_result;
-    cout << "Decrypting result: ";
-	start = clock();
-    decryptor.decrypt(encrypted1, plain_result);
-	duration = ( clock() - start ) / (double) CLOCKS_PER_SEC;
-    cout << "Done in " << duration << endl;
+		start = clock();
+		decryptor.decrypt(encrypted1, plain_result);
+		d_duration = d_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
+		
+	}
 
-	// Print result
-	cout << "Decoded integer: " << encoder.decode_int32(plain_result) << endl;
+	// Divide by 10 because encrypting 2 numbers 5 times each
+	cout << "Avg encryption time: " << e_duration/10 << endl;
+	cout << "Avg decryption time: " << d_duration/5 << endl;
+	cout << "Avg addition time: " << add_duration/5 << endl;
 
+	cout << "=========================================================================" << endl << endl;
 }
