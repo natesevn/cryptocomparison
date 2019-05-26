@@ -3,63 +3,140 @@ from Crypto.Cipher import AES
 from Crypto.Cipher import ChaCha20
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
+from datetime import datetime, timedelta
 
 plaintext = 'abc'
 key = b'01234567890123456789012345678901'
 iv = b'0123456789012345'
+numTrials = 5
 
 # PKCS#7 padding; https://stackoverflow.com/questions/43199123/encrypting-with-aes-256-and-pkcs7-padding
 def pad(m):
     return m+chr(16-len(m)%16)*(16-len(m)%16)
 
+# Prints average time taken for 5 SHA operations
 def timeSHA():
-	hash = SHA256.new()
-	hash.update(plaintext.encode('utf-8'))
-	res = hash.digest()
-	return res
+	totalTime = timedelta(0)
+
+	for i in range(0, numTrials):
+
+		# time hash operations
+		startTime = datetime.now()
+		hash = SHA256.new()
+		hash.update(plaintext.encode('utf-8'))
+		hash.digest()
+		endTime = datetime.now()
+
+		totalTime = totalTime + (endTime - startTime)
+
+	print("Avg hash time: {0}".format(str(totalTime/numTrials)))
+	return 
 
 def timeAES():
-	cipher = AES.new(key, AES.MODE_CBC, iv)
+	totalETime = timedelta(0)
+	totalDTime = timedelta(0)
 
-	# pad PT w/ PKCS#7
-	data = pad(plaintext).encode()
-	ciphertext = cipher.encrypt(data)
+	for i in range(0, numTrials):
 
-	print(ciphertext)
+		# new AES instance for encryption
+		cipher = AES.new(key, AES.MODE_CBC, iv)
 
-	decipher = AES.new(key, AES.MODE_CBC, iv)
-	decipheredtext = decipher.decrypt(ciphertext)
+		# pad PT w/ PKCS#7
+		data = pad(plaintext).encode()
+		
+		# encrypt data
+		startTime = datetime.now()
+		ciphertext = cipher.encrypt(data)
+		endTime = datetime.now()
+		totalETime = totalETime + (endTime - startTime)
+		
+		# new AES instance for decryption
+		decipher = AES.new(key, AES.MODE_CBC, iv)
 
-	print(decipheredtext)
+		# decrypt data
+		startTime = datetime.now()
+		decipheredtext = decipher.decrypt(ciphertext)
+		endTime = datetime.now()
+		totalDTime = totalDTime + (endTime - startTime)
 
+	print("Avg encryption time: {0}".format(str(totalETime/numTrials)))
+	print("Avg decryption time: {0}".format(str(totalDTime/numTrials)))
 	return 
 
+# Prints average time taken for 5 ChaCha encryptions and decryptions 
 def timeChaCha():	
-	cipher = ChaCha20.new(key=key)
-	ciphertext = cipher.encrypt(plaintext.encode())
+	totalETime = timedelta(0)
+	totalDTime = timedelta(0)
+	
+	for i in range(0, numTrials):
 
-	print(ciphertext.hex())
+		# new ChaCha instance for encryption
+		cipher = ChaCha20.new(key=key)
 
-	decipher = ChaCha20.new(key=key, nonce=cipher.nonce)
-	decipheredtext = decipher.decrypt(ciphertext)
+		# encrypt data
+		startTime = datetime.now()
+		ciphertext = cipher.encrypt(plaintext.encode())
+		endTime = datetime.now()
+		totalETime = totalETime + (endTime - startTime)
 
-	print(decipheredtext)
+		# new ChaCha instance for decryption
+		decipher = ChaCha20.new(key=key, nonce=cipher.nonce)
 
+		# decrypt data
+		startTime = datetime.now()
+		decipheredtext = decipher.decrypt(ciphertext)
+		endTime = datetime.now()
+		totalDTime = totalDTime + (endTime - startTime)	
+
+	print("Avg encryption time: {0}".format(str(totalETime/numTrials)))
+	print("Avg decryption time: {0}".format(str(totalDTime/numTrials)))
 	return 
 
+# Prints average time taken for 5 RSA encryptions and decryptions
 def timeRSA():
+	totalETime = timedelta(0)
+	totalDTime = timedelta(0)
+
+	# generate private key
 	key = RSA.generate(2048)
-	
-	cipher = PKCS1_OAEP.new(key)
-	ciphertext = cipher.encrypt(plaintext.encode())
 
-	print(ciphertext.hex())
+	for i in range(0, numTrials):
+		# new RSA instance with key
+		cipher = PKCS1_OAEP.new(key)
 
-	decipheredtext = cipher.decrypt(ciphertext)
+		# encrypt data
+		startTime = datetime.now()
+		ciphertext = cipher.encrypt(plaintext.encode())
+		endTime = datetime.now()
+		totalETime = totalETime + (endTime - startTime)
 
-	print(decipheredtext)
+		# decrypt data
+		startTime = datetime.now()
+		decipheredtext = cipher.decrypt(ciphertext)
+		endTime = datetime.now()
+		totalDTime = totalDTime + (endTime - startTime)	
 
+	print("Avg encryption time: {0}".format(str(totalETime/numTrials)))
+	print("Avg decryption time: {0}".format(str(totalDTime/numTrials)))
 	return 
 	
+if __name__ == '__main__':
+	print("=========================================================================")
+	print("AES256 Operations")
+	timeAES()
+	print("=========================================================================\n")
 
-timeAES()
+	print("=========================================================================")
+	print("ChaCha Operations")
+	timeChaCha()
+	print("=========================================================================\n")
+
+	print("=========================================================================")
+	print("SHA Operations")
+	timeSHA()
+	print("=========================================================================\n")
+
+	print("=========================================================================")
+	print("RSA Operations")
+	timeRSA()
+	print("=========================================================================\n")
