@@ -14,6 +14,8 @@
 #include <iostream>
 #include <ctime>
 
+const int numTrials = 5;
+
 using namespace std;
 
 /*
@@ -25,7 +27,7 @@ int timeAESOp(string plaintext) {
 	clock_t start;
 	double e_duration=0, d_duration=0;
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 
 		// Get RNG
 		Botan::AutoSeeded_RNG rng;
@@ -66,8 +68,8 @@ int timeAESOp(string plaintext) {
 
 	}
 
-	cout << "Avg encryption time: " << e_duration/5 << endl;
-	cout << "Avg decryption time: " << d_duration/5 << endl;
+	cout << "Avg encryption time: " << e_duration/numTrials << endl;
+	cout << "Avg decryption time: " << d_duration/numTrials << endl;
 
 	return 0;
 }
@@ -81,7 +83,7 @@ int timeChaChaOp(string plaintext) {
 	clock_t start;
 	double e_duration=0, d_duration=0;
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 	
 		// Prepare plaintext
 		Botan::secure_vector<uint8_t> pt(plaintext.data(), plaintext.data()+plaintext.length());
@@ -118,8 +120,8 @@ int timeChaChaOp(string plaintext) {
 	
 	}
 
-	cout << "Avg encryption time: " << e_duration/5 << endl;
-	cout << "Avg decryption time: " << d_duration/5 << endl;
+	cout << "Avg encryption time: " << e_duration/numTrials << endl;
+	cout << "Avg decryption time: " << d_duration/numTrials << endl;
 
 }
 
@@ -132,7 +134,7 @@ int timeHashOp(string plaintext) {
 	clock_t start;
 	double duration;
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 		// Initialize hash object
 		unique_ptr<Botan::HashFunction> hash1(Botan::HashFunction::create("SHA-256"));
 
@@ -142,7 +144,7 @@ int timeHashOp(string plaintext) {
 		
 	}
 
-	cout << "Avg hash time: " << duration/5 << endl;
+	cout << "Avg hash time: " << duration/numTrials << endl;
 	return 0;
 }
 
@@ -155,7 +157,7 @@ int timeRSAOp(string plaintext) {
 	clock_t start;
 	double e_duration=0, d_duration=0;
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 
 		// Prepare plaintext
 		Botan::secure_vector<uint8_t> pt(plaintext.data(), plaintext.data()+plaintext.length());
@@ -192,8 +194,8 @@ int timeRSAOp(string plaintext) {
 
 	}
 
-	cout << "Avg encryption time: " << e_duration/5 << endl;
-	cout << "Avg decryption time: " << d_duration/5 << endl;
+	cout << "Avg encryption time: " << e_duration/numTrials << endl;
+	cout << "Avg decryption time: " << d_duration/numTrials << endl;
 
 	return 0;
 }

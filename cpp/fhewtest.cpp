@@ -4,6 +4,8 @@
 #include "FHEW/FHEW.h"
 #include "FHEW/distrib.h"
 
+const int numTrials = 5;
+
 using namespace std;
 
 /*
@@ -56,7 +58,7 @@ int main() {
 	BinGate or_g = static_cast<BinGate>(OR);
 	BinGate and_g = static_cast<BinGate>(AND);
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 
 		// Encrypt operand b'101
 		int a_pt1 = 1;
@@ -133,13 +135,13 @@ int main() {
 		// Extrapolate to get time taken for encrypting 32-bits
 		temp_duration = (temp_duration/3)*32;
 		d_duration += temp_duration;
-		
+
 	}
 
 	// Divide by 10 because encrypting 2 numbers 5 times each
-	cout << "Avg encryption time: " << e_duration/10 << endl;
-	cout << "Avg decryption time: " << d_duration/5 << endl;
-	cout << "Avg addition time: " << add_duration/5 << endl;
+	cout << "Avg encryption time: " << e_duration/(numTrials*2) << endl;
+	cout << "Avg decryption time: " << d_duration/numTrials << endl;
+	cout << "Avg addition time: " << add_duration/numTrials << endl;
 
 	cout << "=========================================================================" << endl << endl;
 }

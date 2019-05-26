@@ -9,6 +9,8 @@
 #include <openssl/sha.h>
 #include <openssl/rsa.h>
 
+const int numTrials = 5;
+
 using namespace std;
 
 // Error handler; prints an error and exits program
@@ -40,7 +42,7 @@ int timeCipherOp(unsigned char *plaintext, unsigned int plaintext_len, const EVP
 	clock_t start;
 	double e_duration=0, d_duration=0;
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 
 		EVP_CIPHER_CTX *ctx;
 
@@ -114,8 +116,8 @@ int timeCipherOp(unsigned char *plaintext, unsigned int plaintext_len, const EVP
 
 	}
 
-	cout << "Avg encryption time: " << e_duration/5 << endl;
-	cout << "Avg decryption time: " << d_duration/5 << endl;
+	cout << "Avg encryption time: " << e_duration/numTrials << endl;
+	cout << "Avg decryption time: " << d_duration/numTrials << endl;
 
 	return 0;
 }
@@ -130,7 +132,7 @@ int timeRSAOp(unsigned char *plaintext, unsigned int plaintext_len) {
 	clock_t start;
 	double e_duration=0, d_duration=0;
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 
 		// Generate RSA key
 		// Setup required data structures
@@ -169,8 +171,8 @@ int timeRSAOp(unsigned char *plaintext, unsigned int plaintext_len) {
 
 	}
 
-	cout << "Avg encryption time: " << e_duration/5 << endl;
-	cout << "Avg decryption time: " << d_duration/5 << endl;
+	cout << "Avg encryption time: " << e_duration/numTrials << endl;
+	cout << "Avg decryption time: " << d_duration/numTrials << endl;
 
 	return 0;
 }
@@ -185,7 +187,7 @@ void timeHashOp(unsigned char *message, unsigned int message_len) {
 	clock_t start;
 	double duration;
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 		unsigned char digest[SHA256_DIGEST_LENGTH];
 
 		SHA256_CTX sha256;
@@ -202,7 +204,7 @@ void timeHashOp(unsigned char *message, unsigned int message_len) {
 		duration = duration + ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 	}
 	
-	cout << "Avg hash time: " << duration/5 << endl;
+	cout << "Avg hash time: " << duration/numTrials << endl;
 	return;
 }
 

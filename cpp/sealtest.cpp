@@ -13,6 +13,8 @@
 
 #include "seal/seal.h"
 
+const int numTrials = 5;
+
 using namespace std;
 using namespace seal;
 
@@ -73,7 +75,7 @@ int main() {
 	// Get an instance of decryptor to decrypt
 	Decryptor decryptor(context, secret_key);
 
-	for(int i=0; i<5; i++) {
+	for(int i=0; i<numTrials; i++) {
 
 		// Encode two integers as plaintext polynomials
 		int value1 = 7;
@@ -107,9 +109,9 @@ int main() {
 	}
 
 	// Divide by 10 because encrypting 2 numbers 5 times each
-	cout << "Avg encryption time: " << e_duration/10 << endl;
-	cout << "Avg decryption time: " << d_duration/5 << endl;
-	cout << "Avg addition time: " << add_duration/5 << endl;
+	cout << "Avg encryption time: " << e_duration/(numTrials*2) << endl;
+	cout << "Avg decryption time: " << d_duration/numTrials << endl;
+	cout << "Avg addition time: " << add_duration/numTrials << endl;
 
 	cout << "=========================================================================" << endl << endl;
 }
