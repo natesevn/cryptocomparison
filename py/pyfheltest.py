@@ -7,7 +7,7 @@ totalATime = timedelta(0)
 totalDTime = timedelta(0)
 
 print("=========================================================================")
-print("Pyfhel")
+print("Pyfhel Operations")
 
 # Creating context and KeyGen
 HE = Pyfhel()
@@ -16,7 +16,6 @@ HE.keyGen()
 
 
 for i in range(0, numTrials):
-	
 	
 	# Encrypt integers
 	startTime = datetime.now()
