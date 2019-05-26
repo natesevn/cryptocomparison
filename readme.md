@@ -1,12 +1,12 @@
 # Comparison Between Different Crypto Libraries
 				
-|Cipher Type	|Algo				|Language/Library		  |
-|---------------|-------------------|-------------------------|
-|Block			|AES256_CBC			|C++/OpenSSL	|C++/Botan|
-|Stream			|ChaCha20			|C++/OpenSSL	|C++/Botan|
-|Asymmetrickey	|RSA_PKCS1_PADDING	|C++/OpenSSL	|C++/Botan|
-|Hash function	|SHA256				|C++/OpenSSL	|C++/Botan|
-|FHE			|					|C++/FHEW		|C++/SEAL |
+|Cipher Type	|Algo				|Language/Library		  									|
+|---------------|-------------------|-------------------------|---------------------------------|
+|Block			|AES256_CBC			|C++/OpenSSL	|C++/Botan|Py/Cryptodome	|Py/Cryptography|
+|Stream			|ChaCha20			|C++/OpenSSL	|C++/Botan|Py/Cryptodome	|Py/Cryptography|
+|Asymmetrickey	|RSA_PKCS1_PADDING	|C++/OpenSSL	|C++/Botan|Py/Cryptodome	|Py/Cryptography|
+|Hash function	|SHA256				|C++/OpenSSL	|C++/Botan|Py/Cryptodome	|Py/Cryptography|
+|FHE			|					|C++/FHEW		|C++/SEAL |Py/fhel			|Py/nufhe		|
 
 ## Installation and Compilation Instructions
 

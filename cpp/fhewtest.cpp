@@ -70,7 +70,7 @@ int main() {
 	/* 
 	 * Lazy adder:
 	 * Full adder requires 2 XORs, 3 ANDs, and 2 ORs per bit
-	 * Total = 16 XORs, 24 ANDs, 16 ORs
+	 * Total = 64 XORs, 96 ANDs, 64 ORs
 	 * Use real data for first 3 XORs
 	 * Simulate the remainder of full adder by just performing operations on 0s (dummy variable)
 	 */ 
@@ -79,12 +79,12 @@ int main() {
 	HomXOR(&s_2, EK, a_2, b_2);
 	HomXOR(&s_3, EK, a_3, b_3);
 
-	for(int i=0; i<24; i++) {
-		if(i<13) {
+	for(int i=0; i<96; i++) {
+		if(i<61) {
 			HomXOR(&dummyRes, EK, dummyCT1, dummyCT2);
 		}
 
-		if(i<16) {
+		if(i<64) {
 			FHEW::HomGate(&dummyRes, or_g, EK, dummyCT1, dummyCT2);
 		}
 
