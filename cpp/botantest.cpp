@@ -157,10 +157,7 @@ int timeRSAOp(string plaintext) {
 	clock_t start;
 	double e_duration=0, d_duration=0;
 
-	for(int i=0; i<numTrials; i++) {
-
-		// Prepare plaintext
-		Botan::secure_vector<uint8_t> pt(plaintext.data(), plaintext.data()+plaintext.length());
+	for(int i=0; i<numTrials; i++) {		
 
 		// Get RNG
 		Botan::AutoSeeded_RNG rng;
@@ -177,19 +174,43 @@ int timeRSAOp(string plaintext) {
 		// Load public, private key
 		Botan::PKCS8_PrivateKey *priv_rsa = Botan::PKCS8::load_key(key_priv, rng);
 		unique_ptr<Botan::Private_Key> kp(priv_rsa);
-
-		// Encrypt with public key
+		
+		// Instantiate encryption object
 		Botan::PK_Encryptor_EME enc(*kp, rng, "EME-PKCS1-v1_5");
 
+		// Prepare plaintext
+		vector<Botan::secure_vector<uint8_t>> pt_vector;
+		size_t length = plaintext.length();
+		size_t maxSize = enc.maximum_input_size();
+	
+		// Split 1 MB plaintext into RSA block sizes
+		for(int j=0; j<(length/maxSize); j++) {
+			size_t startIndex = j*maxSize;
+			size_t endIndex = (j+1)*maxSize;
+
+			Botan::secure_vector<uint8_t> pt(plaintext.data()+startIndex, plaintext.data()+endIndex);
+			pt_vector.push_back(pt);
+		}
+		
+		// Encrypt with public key
+		vector<vector<uint8_t>> ct_vector;
 		start = clock();
-		vector<uint8_t> ct = enc.encrypt(pt, rng);
+		for(auto it : pt_vector) {
+			vector<uint8_t> ct = enc.encrypt(it, rng);
+			ct_vector.push_back(ct);
+		}
 		e_duration = e_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
 
-		// Decrypt with private key
+		// Instantiate decryption object
 		Botan::PK_Decryptor_EME dec(*kp, rng, "EME-PKCS1-v1_5");
 
+		// Decrypt with private key
+		vector<Botan::secure_vector<uint8_t>> dt_vector;
 		start = clock();
-		Botan::secure_vector<uint8_t> dt=   dec.decrypt(ct);
+		for(auto it : ct_vector) {
+			Botan::secure_vector<uint8_t> dt = dec.decrypt(it);
+			dt_vector.push_back(dt);
+		}
 		d_duration = d_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
 
 	}
@@ -201,27 +222,32 @@ int timeRSAOp(string plaintext) {
 }
 
 int main() {
-	
-	string pt = "abc";
+
+	// Generate 5MB of just 'a's
+	//string big_text(5242880, 'a');
+	string big_text = "a";
+
+	// Generate 1MB of just 'a's
+	string small_text(1048576, 'a');
 
 	cout << "=========================================================================" << endl;
 	cout << "AES256 Operations" << endl;
-   	timeAESOp(pt);
+   	timeAESOp(big_text);
 	cout << "=========================================================================" << endl << endl;
 
 	cout << "=========================================================================" << endl;
 	cout << "ChaCha Operations" << endl;
-   	timeChaChaOp(pt);
+   	timeChaChaOp(big_text);
 	cout << "=========================================================================" << endl << endl;
 
 	cout << "=========================================================================" << endl;
 	cout << "SHA256 Operations" << endl;
-   	timeHashOp(pt);
+   	timeHashOp(big_text);
 	cout << "=========================================================================" << endl << endl;
 
 	cout << "=========================================================================" << endl;
 	cout << "RSA Operations" << endl;
-   	timeRSAOp(pt);
+   	timeRSAOp(small_text);
 	cout << "=========================================================================" << endl << endl;
    
    return 0;
