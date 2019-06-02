@@ -224,8 +224,7 @@ int timeRSAOp(string plaintext) {
 int main() {
 
 	// Generate 5MB of just 'a's
-	//string big_text(5242880, 'a');
-	string big_text = "a";
+	string big_text(5242880, 'a');
 
 	// Generate 1MB of just 'a's
 	string small_text(1048576, 'a');
