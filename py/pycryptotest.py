@@ -4,8 +4,11 @@ from Crypto.Cipher import ChaCha20
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.PublicKey import RSA
 from datetime import datetime, timedelta
+import random
+import string
 
-plaintext = 'abc'
+big_plaintext = 'a'*(5242880)
+small_plaintext = 'a'*(1048576)
 key = b'01234567890123456789012345678901'
 iv = b'0123456789012345'
 numTrials = 5
@@ -23,7 +26,7 @@ def timeSHA():
 		# time hash operations
 		startTime = datetime.now()
 		hash = SHA256.new()
-		hash.update(plaintext.encode('utf-8'))
+		hash.update(big_plaintext.encode('utf-8'))
 		hash.digest()
 		endTime = datetime.now()
 
@@ -39,10 +42,10 @@ def timeAES():
 	for i in range(0, numTrials):
 
 		# new AES instance for encryption
-		cipher = AES.new(key, AES.MODE_CBC, iv)
+		cipher = AES.new(key, AES.MODE_ECB)
 
 		# pad PT w/ PKCS#7
-		data = pad(plaintext).encode()
+		data = pad(big_plaintext).encode()
 		
 		# encrypt data
 		startTime = datetime.now()
@@ -75,7 +78,7 @@ def timeChaCha():
 
 		# encrypt data
 		startTime = datetime.now()
-		ciphertext = cipher.encrypt(plaintext.encode())
+		ciphertext = cipher.encrypt(big_plaintext.encode())
 		endTime = datetime.now()
 		totalETime = totalETime + (endTime - startTime)
 
@@ -97,6 +100,13 @@ def timeRSA():
 	totalETime = timedelta(0)
 	totalDTime = timedelta(0)
 
+	# Prepare plaintext
+	# Divide 1MB string into RSA block sizes of 214 bytes
+	chunks, chunk_size = len(small_plaintext), len(small_plaintext)//4900
+	print(chunk_size)
+	pt_array = [small_plaintext[i:i+chunk_size] for i in range(0, chunks, chunk_size)]
+	ct_array = []
+
 	# generate private key
 	key = RSA.generate(2048)
 
@@ -106,13 +116,16 @@ def timeRSA():
 
 		# encrypt data
 		startTime = datetime.now()
-		ciphertext = cipher.encrypt(plaintext.encode())
+		for i in pt_array:
+			ciphertext = cipher.encrypt(i.encode())
+			ct_array.append(ciphertext)
 		endTime = datetime.now()
 		totalETime = totalETime + (endTime - startTime)
 
 		# decrypt data
 		startTime = datetime.now()
-		decipheredtext = cipher.decrypt(ciphertext)
+		for i in ct_array:
+			decipheredtext = cipher.decrypt(i)
 		endTime = datetime.now()
 		totalDTime = totalDTime + (endTime - startTime)	
 
