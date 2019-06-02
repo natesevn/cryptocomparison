@@ -32,13 +32,12 @@ int timeAESOp(string plaintext) {
 		// Get RNG
 		Botan::AutoSeeded_RNG rng;
 
-		// Get key and iv
+		// Get key
 		const vector<uint8_t> key = Botan::hex_decode("2B7E151628AED2A6ABF7158809CF4F3C2B7E151628AED2A6ABF7158809CF4F3C");
-		Botan::secure_vector<uint8_t> iv = rng.random_vec(16);
 
 		// Create encrypt object
-		unique_ptr<Botan::Cipher_Mode> enc = Botan::Cipher_Mode::create("AES-256/CBC/PKCS7", Botan::ENCRYPTION);
-		enc->set_key(key);
+		unique_ptr<Botan::BlockCipher> cipher(Botan::BlockCipher::create("AES-256"));
+		cipher->set_key(key);
 
 		// Copy input data to a buffer that will be encrypted
 		Botan::secure_vector<uint8_t> pt(plaintext.data(), plaintext.data()+plaintext.length());
@@ -46,13 +45,8 @@ int timeAESOp(string plaintext) {
 		// Encrypt
 		// Time encryption
 		start = clock();
-		enc->start(iv);
-		enc->finish(pt);
+		cipher->encrypt(pt);
 		e_duration = e_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
-
-		// Create decrypt object
-		unique_ptr<Botan::Cipher_Mode> dec = Botan::Cipher_Mode::create("AES-256/CBC/PKCS7", Botan::DECRYPTION);
-		dec->set_key(key);
 
 		// Copy ciphertext into buffer that will be decrypted
 		Botan::secure_vector<uint8_t> dt(pt);
@@ -60,11 +54,8 @@ int timeAESOp(string plaintext) {
 		// Decrypt
 		// Time decryption
 		start = clock();
-		dec->start(iv);
-		dec->finish(dt);
+		cipher->decrypt(dt);
 		d_duration = d_duration + ( clock() - start ) / (double) CLOCKS_PER_SEC;
-
-		string str(dt.begin(), dt.end());
 
 	}
 
