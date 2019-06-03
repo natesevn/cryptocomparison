@@ -5,6 +5,8 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from datetime import datetime, timedelta
 
+big_plaintext = 'a'*(5242880)
+small_plaintext = 'a'*(1048576)
 plaintext = 'abc'
 key = b'01234567890123456789012345678901'
 iv = b'0123456789012345'
@@ -24,7 +26,7 @@ def timeSHA():
 
 		# time hash operations
 		startTime = datetime.now()
-		digest.update(plaintext.encode())
+		digest.update(big_plaintext.encode())
 		digest.finalize()
 		endTime = datetime.now()
 
@@ -40,7 +42,7 @@ def timeAES():
 
 	backend = default_backend()
 
-	data = pad(plaintext).encode()
+	data = pad(big_plaintext).encode()
 
 	for i in range(0, numTrials):
 
@@ -87,7 +89,7 @@ def timeChaCha():
 
 		# encrypt data
 		startTime = datetime.now()
-		ct = encryptor.update(plaintext.encode())
+		ct = encryptor.update(big_plaintext.encode())
 		endTime = datetime.now()
 		totalETime = totalETime + (endTime - startTime)
 
@@ -106,6 +108,12 @@ def timeRSA():
 	totalETime = timedelta(0)
 	totalDTime = timedelta(0)
 
+	# Prepare plaintext
+	# Divide 1MB string into RSA block sizes of 214 bytes
+	chunks, chunk_size = len(small_plaintext), len(small_plaintext)//4900
+	pt_array = [small_plaintext[i:i+chunk_size] for i in range(0, chunks, chunk_size)]
+	ct_array = []
+
 	# generate keys
 	private_key = rsa.generate_private_key(
 		public_exponent=65537,
@@ -118,19 +126,22 @@ def timeRSA():
 
 		# encrypt
 		startTime = datetime.now()
-		ct = public_key.encrypt(
-			plaintext.encode(),
-			padding.PKCS1v15()
-		)
+		for i in pt_array:
+			ct = public_key.encrypt(
+				i.encode(),
+				padding.PKCS1v15()
+			)
+			ct_array.append(ct)
 		endTime = datetime.now()
 		totalETime = totalETime + (endTime - startTime)
 
 		# decrypt
 		startTime = datetime.now()
-		dt = private_key.decrypt(
-			ct,
-			padding.PKCS1v15()
-		)
+		for i in ct_array:
+			dt = private_key.decrypt(
+				i,
+				padding.PKCS1v15()
+			)
 		endTime = datetime.now()
 		totalDTime = totalDTime + (endTime - startTime)	
 	

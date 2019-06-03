@@ -103,7 +103,6 @@ def timeRSA():
 	# Prepare plaintext
 	# Divide 1MB string into RSA block sizes of 214 bytes
 	chunks, chunk_size = len(small_plaintext), len(small_plaintext)//4900
-	print(chunk_size)
 	pt_array = [small_plaintext[i:i+chunk_size] for i in range(0, chunks, chunk_size)]
 	ct_array = []
 
