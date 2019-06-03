@@ -1,13 +1,6 @@
----
-title: Crypto Libary Comparison
-author: Nicholas Handaja
-date: \today
-geometry: margin=2cm
----
-
 # Comparison Between Different Crypto Libraries
 
-|**Cipher Type**	|**Algo**				|	  						|
+|**Cipher Type**	|**Algo**				|	  						||||
 |---------------|-------------------|---------------|-----------|-------------------|---------------|
 |				|					|**C++/OpenSSL**|**C++/Botan**	|**Py/Cryptodome**		|**Py/Cryptography**|
 |				|					|				|		  	|					|				|
